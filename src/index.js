@@ -7,10 +7,11 @@ var query_builder = require('../lib/query_builder');
 
 const dotenv = require("dotenv");
 dotenv.config();
+console.log("username", process.env.MYSQL_USER);
 var dbconn_default = {
 	host : process.env.MYSQL_DB_URL,
-	user : 'root',
-	pass : '',
+	user : process.env.MYSQL_USER,
+	pass : process.env.MYSQL_PASS,
 	dbase : process.env.DB_NAME
 };
 
@@ -50,6 +51,8 @@ app.post('/webhooks/orders/create', async (req, res) => {
         background: "beige",
         ecl: "H"
     });
+    var svg_fn = order["customer"]["email"] + "_" + order["line_items"][0]["product_id"];
+    console.log(svg_fn);
     qb.insert(
          {
              table : process.env.TABLE_NAME,
@@ -57,7 +60,7 @@ app.post('/webhooks/orders/create', async (req, res) => {
                  surname : order["customer"]["first_name"],
                  name : order["customer"]["last_name"],
                  email : order["customer"]["email"],
-                 qr_data : qrcode.svg()
+                 qr_data_path : svg_fn
              }
          }, function(err, result, inserted_id){
              if(!! err){
@@ -67,7 +70,7 @@ app.post('/webhooks/orders/create', async (req, res) => {
              console.log("successfully inserted in " + inserted_id);
          }
      );
-    qrcode.save("realtest.svg", function(error) {
+    qrcode.save("./qr_codes/" + svg_fn + ".svg", function(error) {
         if (error) return console.error(error.message);
         console.log("QR Code saved!");
     });
