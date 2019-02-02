@@ -2,10 +2,24 @@ const express = require('express')
 const app = express()
 const getRawBody = require('raw-body')
 const crypto = require('crypto')
-const secretKey = '496d5643f7467456055eb04065ed716330a97c946738014737f880fbfe208222'
+var QRCode = require('../lib/qrcode.js');
+var query_builder = require('../lib/query_builder');
 
+const dotenv = require("dotenv");
+dotenv.config();
+var dbconn_default = {
+	host : process.env.MYSQL_DB_URL,
+	user : 'root',
+	pass : '',
+	dbase : process.env.DB_NAME
+};
 
-var secretStrJson = {};
+var qb = new query_builder( dbconn_default );
+
+// var secretStrJson = {};
+app.get('/', (req, res) =>{
+    res.send("OK!!!!");
+})
 app.post('/webhooks/orders/create', async (req, res) => {
   console.log('🎉 We got an order!')
 
@@ -17,29 +31,51 @@ app.post('/webhooks/orders/create', async (req, res) => {
 
   // Create a hash using the body and our key
   const hash = crypto
-    .createHmac('sha256', secretKey)
+    .createHmac('sha256', process.env.SECRET_KEY)
     .update(body, 'utf8', 'hex')
     .digest('base64')
 
   // Compare our hash to Shopify's hash
   if (hash === hmac) {
     // It's a match! All good
-    console.log('Phew, it came from Shopify!')
     res.sendStatus(200)
     const order = JSON.parse(body.toString())
-    // console.log("Result : ", order);
-    // console.log("first name ; ", order["customer"]["first_name"]);
-    // console.log("last name ; ", order["customer"]["last_name"]);
-    // console.log("email address ; ", order["customer"]["email"]);
-    secretStrJson = {"surname":order["customer"]["first_name"],
-                     "name":order["customer"]["last_name"],
-                     "mail":order["customer"]["email"]};
-    console.log("info:", secretStrJson);
-  } else {
-    // No match! This request didn't originate from Shopify
-    console.log('Danger! Not from Shopify!')
-    res.sendStatus(403)
-  }
+    qrStr = order["customer"]["first_name"] + "," + order["customer"]["last_name"] + "," + order["customer"]["email"];
+    console.log("order info:", qrStr);
+    var qrcode = new QRCode({
+        content: qrStr,
+        width: 128,
+        height: 128,
+        color: "blue",
+        background: "beige",
+        ecl: "H"
+    });
+    qb.insert(
+        {
+            table : process.env.TABLE_NAME,
+            details : {
+                surname : order["customer"]["first_name"],
+                name : order["customer"]["last_name"],
+                email : order["customer"]["email"],
+                qr_data : qrcode.svg()
+            }
+        }, function(err, result, inserted_id){
+            if(!! err){
+                console.log("mysql insert error : ", err)
+                return;
+            }
+            console.log("successfully inserted in " + inserted_id);
+        }
+    );
+    qrcode.save("realtest.svg", function(error) {
+        if (error) return console.error(error.message);
+        console.log("QR Code saved!");
+    });
+    } else {
+        // No match! This request didn't originate from Shopify
+        console.log('Danger! Not from Shopify!')
+        res.sendStatus(403)
+    }
 })
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
