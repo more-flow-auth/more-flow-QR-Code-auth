@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/routiejin/authenticator/issues"
   },
-  "homepage": "https://github.com/routiejin/authenticator#readme"
+  "homepage": "https://github.com/routiejin/authenticator#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
