@@ -50,23 +50,23 @@ app.post('/webhooks/orders/create', async (req, res) => {
         background: "beige",
         ecl: "H"
     });
-    qb.insert(
-        {
-            table : process.env.TABLE_NAME,
-            details : {
-                surname : order["customer"]["first_name"],
-                name : order["customer"]["last_name"],
-                email : order["customer"]["email"],
-                qr_data : qrcode.svg()
-            }
-        }, function(err, result, inserted_id){
-            if(!! err){
-                console.log("mysql insert error : ", err)
-                return;
-            }
-            console.log("successfully inserted in " + inserted_id);
-        }
-    );
+    // qb.insert(
+    //     {
+    //         table : process.env.TABLE_NAME,
+    //         details : {
+    //             surname : order["customer"]["first_name"],
+    //             name : order["customer"]["last_name"],
+    //             email : order["customer"]["email"],
+    //             qr_data : qrcode.svg()
+    //         }
+    //     }, function(err, result, inserted_id){
+    //         if(!! err){
+    //             console.log("mysql insert error : ", err)
+    //             return;
+    //         }
+    //         console.log("successfully inserted in " + inserted_id);
+    //     }
+    // );
     qrcode.save("realtest.svg", function(error) {
         if (error) return console.error(error.message);
         console.log("QR Code saved!");
