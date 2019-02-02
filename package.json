@@ -1,0 +1,22 @@
+{
+  "name": "more-flow-auth",
+  "version": "1.0.0",
+  "description": "shopify webhook and support mobile app",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "node ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/routiejin/authenticator.git"
+  },
+  "keywords": [
+    "webhook"
+  ],
+  "author": "ZhenqiangLi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/routiejin/authenticator/issues"
+  },
+  "homepage": "https://github.com/routiejin/authenticator#readme"
+}
